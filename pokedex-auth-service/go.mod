@@ -1,4 +1,4 @@
-module github.com/gus-messagi/pokedex-api/pokedex-auth-service/pokedex-auth-service
+module github.com/gus-messagi/pokedex-api/pokedex-auth-service
 
 go 1.16
 
