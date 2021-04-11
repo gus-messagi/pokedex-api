@@ -1,0 +1,35 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  pokedex-main-service
+
+  Sample SAM Template for pokemon-pokedex-service
+  
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  WelcomePokedexFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: welcome/
+      Handler: app.lambdaHandler
+      Runtime: nodejs14.x
+      Events:
+        WelcomePokedex:
+          Type: Api 
+          Properties:
+            Path: /
+            Method: get
+
+Outputs:
+  PokedexApi:
+    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/api/"
+  WelcomePokedexFunction:
+    Description: "Hello World Lambda Function ARN"
+    Value: !GetAtt WelcomePokedexFunction.Arn
+  WelcomePokedexFunctionFunctionIamRole:
+    Description: "Implicit IAM Role created for Hello World function"
+    Value: !GetAtt WelcomePokedexFunction.Arn
