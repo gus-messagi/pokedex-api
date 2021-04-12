@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gus-messagi/pokedex-api/pokedex-auth-service/api/routes"
 	"github.com/gus-messagi/pokedex-api/pokedex-auth-service/pkg/user"
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -36,7 +38,7 @@ func main() {
 func DatabaseConnection() (*mongo.Database, error) {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017/mongo_db"))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(envVariable("MONGO_URL")))
 
 	if err != nil {
 		return nil, err
@@ -45,4 +47,14 @@ func DatabaseConnection() (*mongo.Database, error) {
 	db := client.Database("users")
 
 	return db, nil
+}
+
+func envVariable(key string) string {
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+
+	return os.Getenv(key)
 }
