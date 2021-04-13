@@ -4,13 +4,14 @@ import (
 	"context"
 
 	"github.com/gus-messagi/pokedex-api/pokedex-auth-service/pkg/entities"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type Repository interface {
 	CreateUser(user *entities.User) (*entities.User, error)
+	FindByEmail(email string) (*entities.User, error)
 }
 
 type repository struct {
@@ -26,16 +27,6 @@ func NewRepo(collection *mongo.Collection) Repository {
 func (r *repository) CreateUser(user *entities.User) (*entities.User, error) {
 	user.ID = primitive.NewObjectID()
 
-	password := []byte(user.Password)
-
-	hashPassword, hashErr := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
-
-	if hashErr != nil {
-		return nil, hashErr
-	}
-
-	user.Password = string(hashPassword)
-
 	_, err := r.Collection.InsertOne(context.Background(), user)
 
 	if err != nil {
@@ -43,4 +34,17 @@ func (r *repository) CreateUser(user *entities.User) (*entities.User, error) {
 	}
 
 	return user, nil
+}
+
+func (r *repository) FindByEmail(email string) (*entities.User, error) {
+	var result *entities.User
+
+	filter := bson.D{{"email", email}}
+	err := r.Collection.FindOne(context.Background(), filter).Decode(&result)
+
+	if err == mongo.ErrNoDocuments {
+		return nil, err
+	}
+
+	return result, err
 }
